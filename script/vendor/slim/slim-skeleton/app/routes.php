@@ -34,6 +34,7 @@ return function (App $app) {
 
     $app->get("/articles/{id}", News\ShowArticleAction::class);
 
+    //メール送信
     $app->post('/mailer', Mail\SendMailAction::class);
 
     //imageのみ別個でアップロード
