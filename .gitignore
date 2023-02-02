@@ -1,0 +1,15 @@
+script/vendor/*
+!script/vendor/slim/
+script/vendor/slim/*
+!script/vendor/slim/slim-skeleton/
+script/vendor/slim/slim-skeleton/*
+!script/vendor/slim/slim-skeleton/app/
+!script/vendor/slim/slim-skeleton/src/
+!script/vendor/slim/slim-skeleton/path.php
+script/mailer/
+public/api/cache/
+
+# Executables
+*.env
+*.yml
+.htpasswd
