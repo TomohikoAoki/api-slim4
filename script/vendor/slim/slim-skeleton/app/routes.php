@@ -9,6 +9,9 @@ use App\Application\Actions\User\ViewUserAction;
 use App\Application\Middleware\FormValidationMiddleware;
 use App\Application\Middleware\ImageValidationMiddleware;
 use App\Application\Middleware\AuthorizationMiddleware;
+use App\Application\Middleware\MailValidationMiddleware;
+use App\Application\Middleware\SessionMiddleware;
+use Slim\Csrf;
 use Tuupola\Middleware\JwtAuthentication;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -21,12 +24,12 @@ return function (App $app) {
         return $response;
     });
 
-
     $app->group('/users', function (Group $group) {
         $group->get('', ListUsersAction::class);
         $group->get('/{id}', ViewUserAction::class);
     });
 
+    //ニュース記事取得
     $app->group('/posts', function (Group $group) {
         $group->get("/current", News\NewsListOfCurrentAction::class);
         $group->get("/{page:[0-9]+}", News\NewsListOfPageAction::class);
@@ -35,19 +38,19 @@ return function (App $app) {
     $app->get("/articles/{id}", News\ShowArticleAction::class);
 
     //メール送信
-    $app->post('/mailer', Mail\SendMailAction::class);
+    $app->group('/mail', function (Group $group) {
+        $group->get('/token', Mail\IssueTokenAction::class);
+        $group->post('/check', Mail\CheckMailAction::class)->add(MailValidationMiddleware::class);
+        $group->post('/send', Mail\SendMailAction::class);
+    })->add(Csrf\Guard::class)->add(SessionMiddleware::class);
 
-    //imageのみ別個でアップロード
-    $app->post('/image-upload', News\UploadImageAction::class)->add(ImageValidationMiddleware::class)->add(AuthorizationMiddleware::class)->add(JwtAuthentication::class);
-
-    
-
+    //ニュース記事　フォームでの編集
     $app->group('/article', function (Group $group) {
-        $group->post('/create', News\CreateNewsAction::class);
-        $group->put('/edit/{id}', News\EditNewsAction::class);
+        $group->post('/create', News\CreateNewsAction::class)->add(FormValidationMiddleware::class);
+        $group->put('/edit/{id}', News\EditNewsAction::class)->add(FormValidationMiddleware::class);
+        $group->post('/image-upload', News\UploadImageAction::class)->add(ImageValidationMiddleware::class);
         $group->delete('/delete/{id}', News\DeleteNewsAction::class);
-    })->add(FormValidationMiddleware::class)->add(AuthorizationMiddleware::class)->add(JwtAuthentication::class);
-
+    })->add(AuthorizationMiddleware::class)->add(JwtAuthentication::class);
 
 
     $app->map(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], '/{routes:.+}', function ($request, $response) {

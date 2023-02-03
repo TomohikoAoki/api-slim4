@@ -25,25 +25,47 @@ class SendMailAction
 
     public function __invoke(Request $request, Response $response): Response
     {
-        $mail = new MailService();
-
         $logger = $this->container->get(LoggerInterface::class);
 
+        $mail = new MailService();
         try {
             $result = $mail->sendMail($request);
 
+            if (!$result) {
+                unset($_SESSION['formData']);
+                $body = $response->getBody();
+                $body->write('最初のメールでだめだった');
+
+                return $response->withStatus(500)->withBody($body)->withHeader('Content-Type', 'application/json');
+            }
+        } catch (Exception $e) {
+            unset($_SESSION['formData']);
+            $body = $response->getBody();
+            $body->write('最初のメールでだめだった,catchで');
+
+            return $response->withStatus(500)->withBody($body)->withHeader('Content-Type', 'application/json');
+        }
+
+        try {
+            $result = $mail->sendMail($request, 'reply');
+
             if ($result) {
-                $logger->info('成功');
+                unset($_SESSION['formData']);
                 return $response->withStatus(200);
             }
+            unset($_SESSION['formData']);
+            $body = $response->getBody();
+            $body->write('返信メールでだめだった');
 
-            $logger->info('失敗');
-            return $response->withStatus(200);
+            return $response->withStatus(500)->withBody($body)->withHeader('Content-Type', 'application/json');
+        } catch (Exception $e) {
+            unset($_SESSION['formData']);
+            $body = $response->getBody();
             
-        } catch(Exception $e) {
-            $logger->info('エラー発生');
-            return $response;
+            $logger->info(print_r($e->getMessage(),true));
+
+
+            return $response->withStatus(500)->withBody($body)->withHeader('Content-Type', 'application/json');
         }
-   
     }
 }

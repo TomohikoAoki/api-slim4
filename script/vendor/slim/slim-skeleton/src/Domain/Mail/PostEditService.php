@@ -19,13 +19,20 @@ class PostEditService
 	private $serverParams;
 
 	/**
+	 * @var string
+	 */
+	private $replyTo;
+
+	/**
 	 * @var array
 	 */
 	private $keyLabels = [
-		'name' => '名前',
+		'lastName' => '氏名',
+		'firstName' => '名前',
 		'email' => 'メールアドレス',
 		'gender' => '性別',
-		'address' => '住所',
+		'addI' => '住所',
+		'addII' => 'I以下の住所',
 		'zipCode' => '郵便番号',
 		'phoneNumber' => '電話番号',
 		'shop' => '店舗',
@@ -34,7 +41,8 @@ class PostEditService
 
 	public function __construct(Request $request)
 	{
-		$this->requestBody = $request->getParsedBody();
+		$this->requestBody = (array) $_SESSION['formData'];
+		$this->replyTo = $this->requestBody['email'];
 		$this->serverParams = $request->getServerParams();
 	}
 
@@ -54,7 +62,47 @@ EOT;
 
 		return $set_body;
 	}
-	
+
+	public function getReplyMailBody()
+	{
+
+		$set_body = PHP_EOL;
+
+
+		$set_body .= <<<EOT
+
+この度はお問い合わせをいただき、ありがとうございました。
+折り返し担当者から返信が行きますので、しばらくお待ちください。
+以下の内容でお問い合わせをお受けいたしました。
+EOT;
+
+		$set_body .= $this->createBody($this->requestBody);
+		$set_body .= <<<EOT
+		   
+		 
+この度はお問い合わせを頂き、重ねてお礼申し上げます。
+-----------------------------------------------------------------------------------
+
+	とんきゅう株式会社
+	〒305-0045 茨城県つくば市梅園2-17-4
+	TEL : 029-852-1085
+	Web Site URL : http://ton-q.com/
+		   
+ -----------------------------------------------------------------------------------
+		   
+				   
+EOT;
+
+		return $set_body;
+
+		
+	}
+
+	public function getReplyAddress()
+	{
+		return $this->replyTo;
+	}
+
 
 	private function createBodyOfSenderInfo(array $params)
 	{

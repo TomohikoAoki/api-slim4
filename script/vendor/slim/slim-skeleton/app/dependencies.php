@@ -9,12 +9,13 @@ use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
+use Slim\Psr7\Factory\ResponseFactory;
+use Slim\Csrf\Guard;
 use Illuminate\Database\Capsule\Manager;
 use Tuupola\Middleware\JwtAuthentication;
 use App\Application\Helper\PublicKey;
 use App\Application\Middleware\AuthorizationMiddleware;
 use App\Domain\User\UserRepository;
-use PHPMailer\PHPMailer\PHPMailer;
 
 return function (ContainerBuilder $containerBuilder) {
     $containerBuilder->addDefinitions([
@@ -58,9 +59,9 @@ return function (ContainerBuilder $containerBuilder) {
             $authSettings = $settings->get('authorization_middleware');
             return new AuthorizationMiddleware($c->get(UserRepository::class), $authSettings);
         },
-        PHPMailer::class => function(ContainerInterface $c): PHPMailer
-        {
-            return new PHPMailer(true);
-        }
+        Guard::class => function (ContainerInterface $container) {
+            $response = new ResponseFactory();
+            return new Guard($response);
+        },
     ]);
 };

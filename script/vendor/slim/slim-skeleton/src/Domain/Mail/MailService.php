@@ -37,29 +37,34 @@ class MailService
         ];
     }
 
-    public function sendMail(Request $request)
+    public function sendMail(Request $request, string $mode = null)
     {
         mb_internal_encoding("UTF-8");
+        $this->mailer->clearAddresses();
+
+        $body = new PostEditService($request);
 
         try {
             $this->mailer->isSMTP();
+            $this->mailer->setFrom($_ENV["MAIL_FROM_ADDRESS"], 'とんきゅう株式会社 本部');
+            $this->mailer->isHTML(false);
             foreach ($this->options as $key => $value) {
                 $this->mailer->{$key} = $value;
             }
-            $this->mailer->setFrom($_ENV["MAIL_FROM_ADDRESS"], 'とんきゅう株式会社 本部');
-            $this->mailer->addAddress('aoki@ton-q.com', '青木智彦');
-            $this->mailer->Subject = mb_encode_mimeheader('メールフォームからお問い合わせがありました。', 'ISO-2022-JP');
-            $this->mailer->isHTML(false);
-
-            $body = new PostEditService($request);
-
-            $this->mailer->Body = $body->getMailBody();
+            if (!$mode) {
+                $this->mailer->addAddress('aoki@ton-q.com');
+                $this->mailer->Subject = mb_encode_mimeheader('メールフォームからお問い合わせがありました。', 'ISO-2022-JP');
+                $this->mailer->Body = $body->getMailBody();
+            } else {
+                $this->mailer->addAddress($body->getReplyAddress());
+                $this->mailer->Subject = mb_encode_mimeheader('お問い合わせありがとうございました。', 'ISO-2022-JP');
+                $this->mailer->Body = $body->getReplyMailBody();
+            }
 
             return $this->mailer->send();
-            
+
         } catch (Exception $e) {
-            throw $e;
+            throw new Exception($e->getMessage());
         }
     }
-
 }
