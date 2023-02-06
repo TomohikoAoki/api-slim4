@@ -29,9 +29,10 @@ class EditNewsAction extends NewsAction
 
         //データベース更新
         try {
+            $this->container->get('db');
             $result = $this->newsRepository->update($parameters, $id);
         } catch(Exception $e) {
-            throw new Exception('アップデートなぜかだめ');
+            throw new Exception($e->getMessage());
         }
         
 

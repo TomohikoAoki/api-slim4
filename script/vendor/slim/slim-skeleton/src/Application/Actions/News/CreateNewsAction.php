@@ -29,9 +29,10 @@ class CreateNewsAction extends NewsAction
 
         //データベースに登録
         try {
+            $this->container->get('db');
             $result = $this->newsRepository->register($parameters);
         } catch (Exception $e) {
-            throw new Exception('クリエイトなぜかだめ');
+            throw new Exception($e->getMessage());
         };
 
 

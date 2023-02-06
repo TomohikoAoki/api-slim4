@@ -6,19 +6,10 @@ namespace App\Application\Actions\News;
 
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Log\LoggerInterface;
-use Psr\Container\ContainerInterface;
 use Psr\Http\Message\UploadedFileInterface;
 
 class UploadImageAction
 {
-    private $container;
-
-
-    public function __construct(ContainerInterface $container)
-    {
-        $this->container = $container;
-    }
     /**
      * @param Request $request
      * @param Response $response
@@ -28,7 +19,7 @@ class UploadImageAction
     public function __invoke(Request $request, Response $response): Response
     {
 
-        if (!in_array('write', $request->getAttribute['user_auth'])) {
+        if (!in_array('write', $request->getAttribute('user_auth'))) {
             throw new HttpUnauthorizedException($request);
         };
 

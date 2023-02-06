@@ -21,10 +21,11 @@ class NewsListOfPageAction extends NewsAction
         $limit = 7;
 
         try {
+            $this->container->get('db');
             $count = $this->newsRepository->countAll();
             $news = $this->newsRepository->findAllWithPage($limit, $page);
         } catch(Exception $e) {
-            throw new Exception();
+            throw new Exception($e->getMessage());
         };
 
         $data = [

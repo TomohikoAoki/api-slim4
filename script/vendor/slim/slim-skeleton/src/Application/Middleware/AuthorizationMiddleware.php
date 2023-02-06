@@ -9,11 +9,17 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Slim\Exception\HttpUnauthorizedException;
+use Psr\Container\ContainerInterface;
 use App\Domain\User\UserRepository;
 use Exception;
 
 class AuthorizationMiddleware implements MiddlewareInterface
 {
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
+
     /**
      * @var array{
      *   iss: string,
@@ -34,9 +40,10 @@ class AuthorizationMiddleware implements MiddlewareInterface
      */
     private $userRepository;
 
-    public function __construct(UserRepository $repository, array $options = [])
+    public function __construct(UserRepository $repository, ContainerInterface $container, array $options = [])
     {
         $this->userRepository = $repository;
+        $this->container = $container;
         $this->hydrate($options);
     }
 
@@ -53,9 +60,10 @@ class AuthorizationMiddleware implements MiddlewareInterface
         }
 
         try {
+            $this->container->get('db');
             $user = $this->userRepository->findUserOfUid($payload['user_id']);
         } catch (Exception $e) {
-            throw new HttpUnauthorizedException($request);
+            throw new HttpUnauthorizedException($request, $e->getMessage());
         }
 
         switch ($user['role']) {

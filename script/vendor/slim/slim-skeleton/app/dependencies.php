@@ -57,7 +57,7 @@ return function (ContainerBuilder $containerBuilder) {
         AuthorizationMiddleware::class => function (ContainerInterface $c): AuthorizationMiddleware {
             $settings = $c->get(SettingsInterface::class);
             $authSettings = $settings->get('authorization_middleware');
-            return new AuthorizationMiddleware($c->get(UserRepository::class), $authSettings);
+            return new AuthorizationMiddleware($c->get(UserRepository::class), $c ,$authSettings);
         },
         Guard::class => function (ContainerInterface $container) {
             $response = new ResponseFactory();

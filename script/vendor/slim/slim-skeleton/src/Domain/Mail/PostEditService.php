@@ -43,10 +43,10 @@ class PostEditService
 	{
 		$this->requestBody = (array) $_SESSION['formData'];
 		$this->replyTo = $this->requestBody['email'];
-		$this->serverParams = $request->getServerParams();
+		$this->serverParams = (array) $request->getServerParams();
 	}
 
-	public function getMailBody()
+	public function getMailBody() :string
 	{
 		$set_body = PHP_EOL;
 
@@ -63,7 +63,7 @@ EOT;
 		return $set_body;
 	}
 
-	public function getReplyMailBody()
+	public function getReplyMailBody() :string
 	{
 
 		$set_body = PHP_EOL;
@@ -98,13 +98,13 @@ EOT;
 		
 	}
 
-	public function getReplyAddress()
+	public function getReplyAddress() :string
 	{
 		return $this->replyTo;
 	}
 
 
-	private function createBodyOfSenderInfo(array $params)
+	private function createBodyOfSenderInfo(array $params) :string
 	{
 		$send_date = date('Y年m月d日　H時i分s秒');
 
@@ -135,7 +135,7 @@ EOT;
 		return $set_body;
 	}
 
-	private function createBody(array $inputs)
+	private function createBody(array $inputs) :string
 	{
 		$set_body = PHP_EOL;
 
@@ -154,7 +154,7 @@ EOT;
 		return $set_body;
 	}
 
-	private function sanitize($p)
+	private function sanitize($p) :string
 	{
 		$p = htmlspecialchars($p, ENT_QUOTES, 'UTF-8');
 		str_replace(array("\r\n", "\r", "\n"), '', $p);

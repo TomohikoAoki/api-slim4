@@ -20,7 +20,12 @@ class ShowArticleAction extends NewsAction
 
         $id = (int) $args['id'];
 
-        $article = $this->newsRepository->findId($id);
+        try {
+            $this->container->get('db');
+            $article = $this->newsRepository->findId($id);
+        } catch(Exception $e) {
+            throw new Exception($e->getMessage());
+        };
 
         $body = $response->getBody();
         $body->write(json_encode($article, JSON_UNESCAPED_UNICODE));

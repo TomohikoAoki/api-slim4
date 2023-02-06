@@ -6,9 +6,14 @@ namespace App\Application\Actions\News;
 use App\Domain\News\NewsRepository;
 use Slim\Views\Twig;
 use Psr\Log\LoggerInterface;
+use Psr\Container\ContainerInterface;
 
 class NewsAction
 {
+    /**
+     * @var ContainerInterface
+     */
+    protected $container;
 
     /**
      * @var NewsRepository
@@ -26,8 +31,9 @@ class NewsAction
      * @param Twig $twig
      * @param LoggerInterface $logger
      */
-    public function __construct(NewsRepository $newsRepository, LoggerInterface $logger)
+    public function __construct(ContainerInterface $container, NewsRepository $newsRepository, LoggerInterface $logger)
     {
+        $this->container = $container;
         $this->newsRepository = $newsRepository;
         $this->logger = $logger;
 

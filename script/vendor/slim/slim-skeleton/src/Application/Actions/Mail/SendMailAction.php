@@ -8,26 +8,14 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 use App\Domain\Mail\MailService;
 use Exception;
-use Psr\Log\LoggerInterface;
-use Psr\Container\ContainerInterface;
 
 class SendMailAction
 {
-    /**
-     * @var ContainerInterface
-     */
-    private $container;
-
-    public function __construct(ContainerInterface $container)
-    {
-        $this->container = $container;
-    }
 
     public function __invoke(Request $request, Response $response): Response
     {
-        $logger = $this->container->get(LoggerInterface::class);
-
         $mail = new MailService();
+        //メール送信
         try {
             $result = $mail->sendMail($request);
 
@@ -41,11 +29,12 @@ class SendMailAction
         } catch (Exception $e) {
             unset($_SESSION['formData']);
             $body = $response->getBody();
-            $body->write('最初のメールでだめだった,catchで');
+            $body->write(json_encode($e->getMessage()));
 
             return $response->withStatus(500)->withBody($body)->withHeader('Content-Type', 'application/json');
         }
 
+        //返信メール　送信
         try {
             $result = $mail->sendMail($request, 'reply');
 
@@ -61,10 +50,8 @@ class SendMailAction
         } catch (Exception $e) {
             unset($_SESSION['formData']);
             $body = $response->getBody();
+            $body->write(json_encode($e->getMessage()));
             
-            $logger->info(print_r($e->getMessage(),true));
-
-
             return $response->withStatus(500)->withBody($body)->withHeader('Content-Type', 'application/json');
         }
     }

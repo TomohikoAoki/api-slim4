@@ -19,9 +19,10 @@ class NewsListOfCurrentAction extends NewsAction
     {
 
         try {
+            $this->container->get('db');
             $news = $this->newsRepository->findCurrent();
         } catch(Exception $e) {
-            throw new Exception();
+            throw new Exception($e->getMessage());
         };
 
         $body = $response->getBody();
