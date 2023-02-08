@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Application\Actions\News;
 use App\Application\Actions\Mail;
+use App\Application\Actions\Test;
 use App\Application\Actions\User\ListUsersAction;
 use App\Application\Actions\User\ViewUserAction;
 use App\Application\Middleware\FormValidationMiddleware;
@@ -25,14 +26,18 @@ return function (App $app) {
     });
 
     $app->group('/users', function (Group $group) {
-        $group->get('', ListUsersAction::class);
+        $group->get('/', ListUsersAction::class);
         $group->get('/{id}', ViewUserAction::class);
     });
 
+    //テスト
+    $app->get('/test', Test\TestAction::class);
+
     //ニュース記事取得
     $app->group('/posts', function (Group $group) {
+        $group->get('/index', News\NewsListOfPageAction::class);
         $group->get("/current", News\NewsListOfCurrentAction::class);
-        $group->get("/{page:[0-9]+}", News\NewsListOfPageAction::class);
+        $group->get("/shop/{shopId}", News\NewsListOfShopAction::class);
     });
 
     $app->get("/articles/{id}", News\ShowArticleAction::class);

@@ -7,8 +7,9 @@ namespace App\Application\Actions\News;
 use Exception;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Log\LoggerInterface;
 
-class NewsListOfPageAction extends NewsAction
+class NewsListOfShopAction extends NewsAction
 {
     /**
      * @param Request $request
@@ -19,16 +20,19 @@ class NewsListOfPageAction extends NewsAction
     public function __invoke(Request $request, Response $response, array $args): Response
     {
         $page = (int)$request->getQueryParams()['page'];
+        $shopId = (int)$args['shopId'];
         $limit = 7;
+
+        $logger = $this->container->get(LoggerInterface::class);
 
         try {
             $this->container->get('db');
-            $count = $this->newsRepository->countAll();
-            $news = $this->newsRepository->findAllWithPage($limit, $page);
+            $count = $this->newsRepository->countByShop($shopId);
+            $news = $this->newsRepository->findByShopId($shopId, $limit, $page);
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         };
-
+        
         $data = [
             'page' => $page,
             'limit' => $limit,

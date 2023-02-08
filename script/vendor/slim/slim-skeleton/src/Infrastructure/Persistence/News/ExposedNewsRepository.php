@@ -6,6 +6,7 @@ namespace App\Infrastructure\Persistence\News;
 
 use App\Domain\News\NewsRepository;
 use App\Models\NewsContent as News;
+use Illuminate\Database\Eloquent\Collection;
 use Exception;
 
 class ExposedNewsRepository implements NewsRepository
@@ -20,48 +21,107 @@ class ExposedNewsRepository implements NewsRepository
         $this->news = new News();
     }
 
-    public function countAll()
+    /**
+     * ニュース全件数
+     * 
+     * @return int
+     */
+    public function countAll(): int
     {
         return $this->news::count();
     }
 
-    public function findAllWithPage(int $limit, int $page)
+    /**
+     * ニュース一覧　ページ分けで
+     * @param int $limit 表示数
+     * @param int $page ページ
+     * 
+     * @return Collection
+     * 
+     */
+    public function findAllWithPage(int $limit, int $page = 1): Collection
     {
         $offset = ($page - 1) * $limit;
-        $data = $this->news::orderBy('created_at', 'desc')->offset($offset)->limit($limit)->select('id', 'title', 'created_at', 'thumb_filename')->get();
+        $data = $this->news::query()
+            ->orderBy('created_at', 'desc')
+            ->offset($offset)
+            ->limit($limit)
+            ->select('id', 'title', 'created_at', 'thumb_filename')
+            ->get();
 
         return $data;
-    }
-
-    public function findCurrent()
-    {
-        return $this->news::orderBy('created_at', 'desc')->where('public', 1)->limit(3)->select('id', 'title', 'created_at', 'thumb_filename')->get();
     }
 
     /**
-     * {@inheritdoc}
+     * パブリック設定の最新３件
+     * 
+     * * @return Collection
+     * 
      */
-    public function findAll()
+    public function findCurrent(): Collection
     {
-        $data = $this->news::orderBy('created_at', 'desc')->select('id', 'title', 'created_at', 'thumb_filename')->get();
-
-        return $data;
+        return $this->news::query()
+            ->orderBy('created_at', 'desc')
+            ->where('public', 1)
+            ->limit(3)
+            ->select('id', 'title', 'created_at', 'thumb_filename')
+            ->get();
     }
 
-    public function findId(int $id)
+    /**
+     * ニュース記事　１件
+     * @param int $id
+     * 
+     * @return News
+     */
+    public function findId(int $id): News
     {
         $data = $this->news::find($id);
 
         return $data;
     }
 
-    public function findFromShopId(int $shopId)
+    /**
+     * ニュース記事　店舗ごと　ページネーション付き
+     * 
+     * @param int $shopId ショップID
+     * @param int $limit 表示数
+     * @param int $page 現在のページ
+     * 
+     * @return Collection
+     * 
+     */
+    public function findByShopId(int $shopId, int $limit, int $page = 1): Collection
     {
-        $data = $this->news::find($shopId);
+        $offset = ($page - 1) * $limit;
+        $data = $this->news::query()
+            ->whereRaw("JSON_CONTAINS(shop_ids," . "'{$shopId}'," . "'$')")
+            ->orderBy('created_at', 'desc')
+            ->offset($offset)->limit($limit)
+            ->select('id', 'title', 'created_at', 'thumb_filename')
+            ->get();
 
         return $data;
     }
 
+    /**
+     * ニュース記事一覧件数　店舗ごと
+     * 
+     * @param int $shopId
+     * 
+     * @return int
+     */
+    public function countByShop(int $shopId): int
+    {
+        return $this->news::query()
+            ->whereRaw("JSON_CONTAINS(shop_ids," . "'{$shopId}'," . "'$')")
+            ->count();
+    }
+
+    /**
+     * ニュース記事　新規作成
+     * @param array $data
+     */
     public function register(array $data)
     {
         try {
@@ -73,7 +133,7 @@ class ExposedNewsRepository implements NewsRepository
     }
 
     /**
-     * サムネ画像のURLを取得
+     * ニュース記事　更新
      * @param array $data
      * @param int $id
      */
