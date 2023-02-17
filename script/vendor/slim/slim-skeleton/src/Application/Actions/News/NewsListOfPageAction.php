@@ -4,41 +4,34 @@ declare(strict_types=1);
 
 namespace App\Application\Actions\News;
 
-use Exception;
-use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 
 class NewsListOfPageAction extends NewsAction
 {
+
     /**
-     * @param Request $request
-     * @param Response $response
-     * 
-     * @return Response
+     * {@inheritdoc}
      */
-    public function __invoke(Request $request, Response $response, array $args): Response
+    public function action(): Response 
     {
-        $page = (int)$request->getQueryParams()['page'];
+        $page = (int) $this->resolveQuery('page');
         $limit = 7;
 
-        try {
-            $this->container->get('db');
-            $count = $this->newsRepository->countAll();
-            $news = $this->newsRepository->findAllWithPage($limit, $page);
-        } catch (Exception $e) {
-            throw new Exception($e->getMessage());
-        };
+        $this->container->get('db');
+
+        $count = $this->newsRepository->countAll();
+        $news = $this->newsRepository->findAllWithPage($limit, $page);
 
         $data = [
-            'page' => $page,
-            'limit' => $limit,
-            'count' => $count,
+            'pagination' => [
+                'page' => $page,
+                'limit' => $limit,
+                'count' => $count,
+            ],
             'news_data' => $news
         ];
 
-        $body = $response->getBody();
-        $body->write(json_encode($data, JSON_UNESCAPED_UNICODE));
-        $response = $response->withBody($body)->withHeader('Content-Type', 'application/json');
-        return $response;
+        return $this->respondWithData($data);
+
     }
 }

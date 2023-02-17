@@ -8,7 +8,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface as Middleware;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
-use Tuupola\Http\Factory\ResponseFactory;
+use Slim\Psr7\Factory\ResponseFactory;
 use Valitron;
 
 class MailValidationMiddleware implements Middleware
@@ -18,7 +18,7 @@ class MailValidationMiddleware implements Middleware
      */
     public function process(Request $request, RequestHandler $handler): Response
     {
-    
+
         //POST,PUTをバリデーション
         if (in_array($request->getMethod(), ['POST', 'PUT'])) {
 
@@ -32,7 +32,7 @@ class MailValidationMiddleware implements Middleware
             $validator = new Valitron\Validator($parameters);
 
             //ルール
-            $validator->rule('required', ['lastName', 'firstName', 'email', 'emailConfirmed', 'zipCode', 'shop', 'content'])->message('{field}は必須項目です。');
+            $validator->rule('required', ['lastName', 'firstName', 'email', 'emailConfirmed', 'shop', 'content'])->message('{field}は必須項目です。');
             $validator->rule('lengthMax', ['lastName', 'firstName'], 10)->message('入力可能な文字数は10字までです。');
             $validator->rule('email', 'email')->message('正しいメール形式で入力してください。');
             $validator->rule('equals', 'email', 'emailConfirmed')->message('メールアドレスと確認用メールアドレスが違います。');
@@ -57,10 +57,13 @@ class MailValidationMiddleware implements Middleware
 
                 $response = (new ResponseFactory)->createResponse(422);
 
+                $token['csrf_name'] = $request->getAttribute('csrf_name');
+                $token['csrf_value'] = $request->getAttribute('csrf_value');
+
                 $response
                     ->withHeader('Content-Type', 'application/json;charset=utf-8')
                     ->getBody()->write(json_encode(
-                        $message,
+                        ['messages' => $message, 'token' => $token],
                         JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
                     ));
 

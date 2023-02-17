@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Application\Actions;
 
 use App\Domain\DomainException\DomainRecordNotFoundException;
+use App\Domain\News\NewsDomainException;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
@@ -33,6 +34,11 @@ abstract class Action
     protected $args;
 
     /**
+     * @var mixed
+     */
+    protected $query;
+
+    /**
      * @param LoggerInterface $logger
      */
     public function __construct(LoggerInterface $logger)
@@ -53,11 +59,14 @@ abstract class Action
         $this->request = $request;
         $this->response = $response;
         $this->args = $args;
+        $this->query = $request->getQueryParams();
 
         try {
             return $this->action();
         } catch (DomainRecordNotFoundException $e) {
             throw new HttpNotFoundException($this->request, $e->getMessage());
+        } catch (NewsDomainException $e) {
+            throw new HttpInternalServerErrorException($this->request, $e->getMessage());
         }
     }
 

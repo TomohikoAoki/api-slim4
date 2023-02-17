@@ -9,25 +9,18 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 class DeleteNewsAction extends NewsAction
 {
-    public function __invoke(Request $request, Response $response, array $args): Response
+    /**
+     * {@inheritdoc}
+     */
+    public function action(): Response
     {
-        $id = (int) $args['id'];
+        $id = (int) $this->resolveArg('id');
 
-        if (!in_array('write', $request->getAttribute('user_auth'))) {
-            throw new HttpUnauthorizedException($request);
-        };
-
-        try {
+        if($this->checkAuth('write')) {
             $this->container->get('db');
             $result = $this->newsRepository->delete($id);
-        } catch(Exception $e) {
-            throw new Exception($e->getMessage());
+
+            return $this->respondWithData($result);
         }
-
-        $body = $response->getBody();
-        $body->write(json_encode($result));
-
-        return $response->withBody($body);
-        
     }
 }

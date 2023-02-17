@@ -37,6 +37,7 @@ return function (App $app) {
     $app->group('/posts', function (Group $group) {
         $group->get('/index', News\NewsListOfPageAction::class);
         $group->get("/current", News\NewsListOfCurrentAction::class);
+        $group->get("/current/{shopId}", News\NewsListOfCurrentByShopAction::class);
         $group->get("/shop/{shopId}", News\NewsListOfShopAction::class);
     });
 

@@ -6,8 +6,11 @@ namespace App\Application\Actions\News;
 use App\Domain\News\NewsRepository;
 use Psr\Log\LoggerInterface;
 use Psr\Container\ContainerInterface;
+use App\Application\Actions\Action;
+use Slim\Exception\HttpBadRequestException;
+use Slim\Exception\HttpUnauthorizedException;
 
-class NewsAction
+abstract class NewsAction extends Action
 {
     /**
      * @var ContainerInterface
@@ -20,9 +23,9 @@ class NewsAction
     protected $newsRepository;
 
     /**
-     * @var LoggerInterface
+     * @var void
      */
-    protected $logger;
+    protected $query;
 
 
     /**
@@ -34,8 +37,36 @@ class NewsAction
     {
         $this->container = $container;
         $this->newsRepository = $newsRepository;
-        $this->logger = $logger;
+        parent::__construct($logger);
 
+    }
+
+    /**
+     * @param  string $name
+     * @return mixed
+     * @throws HttpBadRequestException
+     */
+    protected function resolveQuery(string $name)
+    {
+        if (!isset($this->query[$name])) {
+            throw new HttpBadRequestException($this->request, "クエリパラメータが不正な値です");
+        }
+
+        return $this->query[$name];
+    }
+
+    /**
+     * @param string $auth
+     * @return bool
+     * @throws HttpUnauthorizedException
+     */
+    protected function checkAuth(string $auth): bool
+    {
+        if(!in_array($auth, $this->request->getAttribute('user_auth'))) {
+            throw new HttpUnauthorizedException($this->request, '権限がありません');
+        }
+
+        return true;
     }
     
 }

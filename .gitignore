@@ -7,6 +7,8 @@ script/vendor/slim/slim-skeleton/*
 !script/vendor/slim/slim-skeleton/src/
 !script/vendor/slim/slim-skeleton/path.php
 script/mailer/
+public/
+!public/api
 public/api/cache/
 
 # Executables
