@@ -46,13 +46,15 @@ abstract class NewsAction extends Action
      * @return mixed
      * @throws HttpBadRequestException
      */
-    protected function resolveQuery(string $name)
+    protected function resolvePageQuery()
     {
-        if (!isset($this->query[$name])) {
+        $page = $this->query['page'];
+        
+        if (!preg_match("/^[0-9]+$/",$page)) {
             throw new HttpBadRequestException($this->request, "クエリパラメータが不正な値です");
         }
 
-        return $this->query[$name];
+        return $page;
     }
 
     /**

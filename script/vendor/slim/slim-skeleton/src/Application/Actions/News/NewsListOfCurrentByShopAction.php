@@ -7,7 +7,6 @@ use Psr\Http\Message\ResponseInterface as Response;
 
 class NewsListOfCurrentByShopAction extends NewsAction
 {
-    
     /**
      * {@inheritdoc}
      */
