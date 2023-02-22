@@ -192,10 +192,10 @@ class ExposedNewsRepository implements NewsRepository
      * ニュース記事　更新
      * @param array $data
      * @param int $id
-     * @return News
+     * @return bool
      * @throws NewsDomainException
      */
-    public function update(array $data, int $id): News
+    public function update(array $data, int $id): bool
     {
         try {
             $result = $this->news->find($id)->update($data);

@@ -1,15 +1,16 @@
 <?php
+
 declare(strict_types=1);
 
-$publicUrl = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://').$_SERVER['HTTP_HOST'].getBasePath();
+$publicUrl = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . getBasePath();
 
 // public index.php path
 define('PUBLIC_PATH', __DIR__);
 define('PUBLIC_URI', $publicUrl);
-define('UPLOAD_PATH',"/cache/uploads");
+define('UPLOAD_PATH', "/cache/uploads");
 
 // app path
-require_once __DIR__ .'/../../script/vendor/slim/slim-skeleton/path.php';
+require_once __DIR__ . '/../../script/vendor/slim/slim-skeleton/path.php';
 
 use App\Application\Handlers\HttpErrorHandler;
 use App\Application\Handlers\ShutdownHandler;
@@ -30,7 +31,7 @@ $dotenv->load();
 $containerBuilder = new ContainerBuilder();
 
 if (false) { // Should be set to true in production
-	$containerBuilder->enableCompilation( APP_PATH . '/var/cache');
+    $containerBuilder->enableCompilation(APP_PATH . '/var/cache');
 }
 
 // Set up settings
@@ -100,10 +101,9 @@ $responseEmitter = new ResponseEmitter();
 $responseEmitter->emit($response);
 
 //Get Base Path
-function getBasePath() 
+function getBasePath()
 {
     $basePath = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
     if ($basePath == '/') return '';
     return $basePath;
 }
-

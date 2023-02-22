@@ -22,7 +22,7 @@ class FormValidationMiddleware implements Middleware
         $validationFormat = [
             //タイトルのマックス文字数
             'title' => [
-                'lengthMax' => 30,
+                'lengthMax' => 10,
             ],
             //店舗ID
             'shop_ids' => [

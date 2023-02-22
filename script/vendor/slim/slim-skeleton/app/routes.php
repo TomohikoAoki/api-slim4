@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Application\Actions\News;
 use App\Application\Actions\Mail;
-use App\Application\Actions\Test;
 use App\Application\Actions\User\ListUsersAction;
 use App\Application\Actions\User\ViewUserAction;
 use App\Application\Middleware\FormValidationMiddleware;
@@ -18,6 +17,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
 use Slim\Interfaces\RouteCollectorProxyInterface as Group;
+use Slim\Exception\HttpNotFoundException;
 
 return function (App $app) {
     $app->options('/{routes:.*}', function (Request $request, Response $response) {
@@ -29,9 +29,6 @@ return function (App $app) {
         $group->get('/', ListUsersAction::class);
         $group->get('/{id}', ViewUserAction::class);
     });
-
-    //テスト
-    $app->get('/test', Test\TestAction::class);
 
     //ニュース記事取得
     $app->group('/posts', function (Group $group) {
@@ -54,8 +51,9 @@ return function (App $app) {
     $app->group('/article', function (Group $group) {
         $group->post('/create', News\CreateNewsAction::class)->add(FormValidationMiddleware::class);
         $group->put('/edit/{id}', News\EditNewsAction::class)->add(FormValidationMiddleware::class);
-        $group->post('/image-upload', News\UploadImageAction::class)->add(ImageValidationMiddleware::class);
         $group->delete('/delete/{id}', News\DeleteNewsAction::class);
+        $group->post('/image-upload', News\UploadImageAction::class)->add(ImageValidationMiddleware::class);
+        $group->delete('/image-upload/delete', News\DeleteImageAction::class);
     })->add(AuthorizationMiddleware::class)->add(JwtAuthentication::class);
 
 

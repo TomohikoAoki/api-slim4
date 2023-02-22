@@ -53,6 +53,7 @@ abstract class Action
      * @return Response
      * @throws HttpNotFoundException
      * @throws HttpBadRequestException
+     * @throws HttpInternalServerErrorException
      */
     public function __invoke(Request $request, Response $response, array $args): Response
     {
@@ -74,6 +75,7 @@ abstract class Action
      * @return Response
      * @throws DomainRecordNotFoundException
      * @throws HttpBadRequestException
+     * @throws HttpInternalServerErrorException
      */
     abstract protected function action(): Response;
 
